@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <title>Analysis Result - Deepfake Image Detector</title>
+        <style>
+                body {
+                        font-family: Arial, sans-serif;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #f5f5f5;
+                }
+                .container {
+                        background-color: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                h1 {
+                        color: #333;
+                        text-align: center;
+                }
+                .result-container {
+                        text-align: center;
+                        margin-top: 20px;
+                }
+                .image-container {
+                        margin: 20px 0;
+                }
+                .image-container img {
+                        max-width: 100%;
+                        max-height: 400px;
+                        border-radius: 4px;
+                }
+                .probability-bar {
+                        background-color: #f0f0f0;
+                        border-radius: 4px;
+                        margin: 10px 0;
+                        padding: 3px;
+                }
+                .probability-fill {
+                        height: 20px;
+                        border-radius: 2px;
+                        transition: width 0.3s ease;
+                }
+                .real {
+                        background-color: #4CAF50;
+                }
+                .fake {
+                        background-color: #f44336;
+                }
+                .back-btn {
+                        background-color: #2196F3;
+                        color: white;
+                        padding: 10px 20px;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        text-decoration: none;
+                        display: inline-block;
+                        margin-top: 20px;
+                }
+                .back-btn:hover {
+                        background-color: #1976D2;
+                }
+        </style>
+</head>
+<body>
+        <div class="container">
+                <h1>Analysis Result</h1>
+                <div class="result-container">
+                        <div class="image-container">
+                                <img src="data:image/jpeg;base64,{{ image_data }}" alt="Analyzed Image">
+                        </div>
+                        <h2>Prediction: {{ result.prediction }}</h2>
+                        <div>
+                                <p>Probability of being real:</p>
+                                <div class="probability-bar">
+                                        <div class="probability-fill real" style="width: {{ result.real_probability }}%"></div>
+                                </div>
+                                <p>{{ "%.2f"|format(result.real_probability) }}%</p>
+                        </div>
+                        <div>
+                                <p>Probability of being fake:</p>
+                                <div class="probability-bar">
+                                        <div class="probability-fill fake" style="width: {{ result.fake_probability }}%"></div>
+                                </div>
+                                <p>{{ "%.2f"|format(result.fake_probability) }}%</p>
+                        </div>
+                        <a href="/" class="back-btn">Analyze Another Image</a>
+                </div>
+        </div>
+</body>
+</html>

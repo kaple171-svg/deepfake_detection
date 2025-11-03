@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DeepVerify — UI Preview</title>
+  <link rel="stylesheet" href="./static/design.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">DV</div>
+      <div>
+        <div class="title">DeepVerify — Deepfake Image Detector</div>
+        <div class="subtitle">Quick, explainable image authenticity checks with clear confidence scores</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="card">
+        <div class="upload-card">
+          <div style="font-size:18px;font-weight:600">Upload an image to analyze</div>
+          <div class="small">Drag & drop a .jpg/.png or click to choose a file. Images are removed after analysis.</div>
+          <label class="upload-btn" for="fileInput">Choose image</label>
+          <input id="fileInput" type="file" accept="image/*">
+          <div class="small">Recommended: clear headshots or scene photos (≥600×600 px)</div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:12px;align-items:center">
+          <button class="upload-btn" id="analyzeBtn">Analyze Image</button>
+          <button class="cta-secondary" id="resetBtn">Analyze Another</button>
+        </div>
+
+        <div class="footer">
+          <div class="note">Note: With limited training data, probabilities may be noisy.</div>
+          <div class="small">Want better accuracy? Add more labeled images.</div>
+        </div>
+      </div>
+
+      <div class="card preview">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:600">Preview & Result</div>
+          <div id="badge" class="result-badge badge-real">Real</div>
+        </div>
+
+        <div id="previewImg" class="preview-img">No image selected</div>
+
+        <div style="margin-top:8px">
+          <div class="prob-row">
+            <div class="prob-label">Real</div>
+            <div class="prog"><div id="fillReal" class="fill fill-real"></div></div>
+            <div class="prob-num" id="numReal">0%</div>
+          </div>
+          <div class="prob-row" style="margin-top:8px">
+            <div class="prob-label">Fake</div>
+            <div class="prog"><div id="fillFake" class="fill fill-fake"></div></div>
+            <div class="prob-num" id="numFake">0%</div>
+          </div>
+        </div>
+
+        <div class="features">
+          <div class="feature"><strong>Color & texture</strong><div class="small">Color histogram, LBP</div></div>
+          <div class="feature"><strong>Edge & detail</strong><div class="small">Multi-scale gradient, contours</div></div>
+          <div class="feature"><strong>Noise & blur</strong><div class="small">Laplacian variance, noise estimation</div></div>
+          <div class="feature"><strong>Explainability</strong><div class="small">See raw features on download</div></div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <div class="small">Why we think so: <span style="color:var(--muted)">Consistent texture & natural edges</span></div>
+          <div>
+            <button class="cta-secondary" id="downloadBtn">Download report</button>
+            <button class="upload-btn" id="explainBtn" style="margin-left:8px">Explain more</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+// Small demo script to simulate analysis and animate bars
+const analyzeBtn=document.getElementById('analyzeBtn');
+const resetBtn=document.getElementById('resetBtn');
+const fileInput=document.getElementById('fileInput');
+const previewImg=document.getElementById('previewImg');
+const badge=document.getElementById('badge');
+const fillReal=document.getElementById('fillReal');
+const fillFake=document.getElementById('fillFake');
+const numReal=document.getElementById('numReal');
+const numFake=document.getElementById('numFake');
+
+let currentData=null;
+fileInput.addEventListener('change', (e)=>{
+  const f=e.target.files[0];
+  if(!f) return;
+  const url=URL.createObjectURL(f);
+  previewImg.innerHTML='';
+  const img=document.createElement('img'); img.src=url; img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; img.style.borderRadius='8px';
+  previewImg.appendChild(img);
+  currentData=true;
+});
+
+function animateTo(realPct){
+  const fakePct=100-realPct;
+  fillReal.style.width=realPct+'%';
+  fillFake.style.width=fakePct+'%';
+  numReal.textContent=realPct.toFixed(1)+'%';
+  numFake.textContent=fakePct.toFixed(1)+'%';
+  if(realPct>=50){ badge.className='result-badge badge-real'; badge.textContent='Real'; }
+  else{ badge.className='result-badge badge-fake'; badge.textContent='Fake'; }
+}
+
+analyzeBtn.addEventListener('click', ()=>{
+  if(!currentData){ alert('Please choose an image first.'); return; }
+  analyzeBtn.disabled=true; analyzeBtn.textContent='Analyzing...';
+  setTimeout(()=>{
+    // simulate a random result biased towards Real for demo
+    const realPct= Math.round((50 + Math.random()*40)*10)/10;
+    animateTo(realPct);
+    analyzeBtn.disabled=false; analyzeBtn.textContent='Analyze Image';
+  }, 900);
+});
+
+resetBtn.addEventListener('click', ()=>{ previewImg.innerHTML='No image selected'; fileInput.value=''; currentData=null; animateTo(0); badge.className='result-badge badge-real'; badge.textContent='Real'; });
+
+// set initial state
+animateTo(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Preview — Beautiful UI</title>
+            <link rel="stylesheet" href="/static/styles.css">
+    </head>
+    <body>
+        <div class="preview-wrap">
+            <div class="app-hero">
+                <div class="left">
+                    <div class="card">
+                        <h1>Image Authentication</h1>
+                        <p class="lead">Upload an image and let the model estimate authenticity. Clean visuals and clear probability feedback.</p>
+
+                                    <label id="drop-area" class="upload-area" for="file-input" tabindex="0" aria-label="File upload area">
+                            <div class="upload-icon">AI</div>
+                            <div class="upload-instructions">
+                                <div style="font-weight:700">Click to choose or drop an image</div>
+                                <div class="meta">PNG, JPG up to 10MB • No upload saved permanently</div>
+                            </div>
+                        </label>
+                        <input id="file-input" type="file" accept="image/*" />
+
+                        <div class="preview-panel mt-4">
+                            <img id="preview-img" class="img-preview" src="https://via.placeholder.com/800x480?text=No+image+selected" alt="preview">
+
+                            <div class="result-card card">
+                                <div class="result-title">
+                                    <div>
+                                        <div style="font-weight:700">Model Output</div>
+                                        <div class="label">Confidence score</div>
+                                    </div>
+                                    <div class="label">Decision: <span id="decision">—</span></div>
+                                </div>
+
+                                <div>
+                                    <div class="probability-label">Realness</div>
+                                    <div class="probability-bar">
+                                        <div id="prob-fill" class="probability-fill">0%</div>
+                                    </div>
+                                </div>
+
+                                <div class="actions">
+                                    <button id="analyze" class="btn-primary">Analyze</button>
+                                    <button id="reset" class="btn">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right">
+                    <div class="card">
+                        <div class="help">Tip: use the sample images in <code>/dataset/</code> if you want to test locally. This preview does not change your app files.</div>
+                        <div class="stats">
+                            <div class="stat">
+                                <div class="num">62</div>
+                                <div class="label">Features</div>
+                            </div>
+                            <div class="stat">
+                                <div class="num">SVM</div>
+                                <div class="label">Classifier</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <script>
+                const fileInput = document.getElementById('file-input');
+                const previewImg = document.getElementById('preview-img');
+                const probFill = document.getElementById('prob-fill');
+                const decision = document.getElementById('decision');
+                const analyze = document.getElementById('analyze');
+                const reset = document.getElementById('reset');
+                const dropArea = document.getElementById('drop-area');
+
+                // helper to set probability UI with smooth animation
+                function setProb(p){
+                    probFill.style.width = p + '%';
+                    probFill.textContent = p + '%';
+                }
+
+                // handle file selection
+                fileInput.addEventListener('change', e => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    const url = URL.createObjectURL(file);
+                    previewImg.src = url;
+                    decision.textContent = '—';
+                    setProb(0);
+                });
+
+                // simulate analysis
+                analyze.addEventListener('click', () => {
+                    analyze.disabled = true;
+                    analyze.textContent = 'Analyzing...';
+                    // simulate progress then final value
+                    let progress = 0;
+                    const t = setInterval(()=>{
+                        progress = Math.min(95, progress + Math.random()*18);
+                        setProb(Math.round(progress));
+                    }, 220);
+                    setTimeout(()=>{
+                        clearInterval(t);
+                        const value = Math.round(20 + Math.random()*80);
+                        setProb(value);
+                        decision.textContent = value>=50? 'Real':'Fake';
+                        analyze.disabled = false;
+                        analyze.textContent = 'Analyze';
+                    }, 1600 + Math.random()*800);
+                });
+
+                reset.addEventListener('click', ()=>{
+                    previewImg.src = 'https://via.placeholder.com/800x480?text=No+image+selected';
+                    setProb(0);
+                    decision.textContent = '—';
+                    fileInput.value = '';
+                });
+
+                // Drag & drop support
+                ;['dragenter','dragover'].forEach(evt => {
+                    dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.add('drag-over'); });
+                });
+                ;['dragleave','drop'].forEach(evt => {
+                    dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.remove('drag-over'); });
+                });
+                dropArea.addEventListener('drop', e => {
+                    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                    if (!file) return;
+                    fileInput.files = e.dataTransfer.files;
+                    const url = URL.createObjectURL(file);
+                    previewImg.src = url;
+                    setProb(0);
+                    decision.textContent = '—';
+                });
+
+                // keyboard: enter to open file picker
+                dropArea.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+            </script>
+    </body>
+</html>
